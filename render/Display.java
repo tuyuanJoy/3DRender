@@ -161,6 +161,8 @@ public class Display extends Canvas implements Runnable {
 		}else if(this.mouse.isScrollingDown()){
 			PointConverter.zoomOut();
 		}
+
+		this.mouse.resetScroll( );
 	//	this.entityManager.update( );
 	}
 
