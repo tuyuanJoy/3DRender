@@ -1,39 +1,42 @@
-package data;
+package renderer.world;  
+
 import java.util.ArrayList;
-import java.io.File;  
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-import basicelement.*;
-import render.Display;
+import renderer.point.*;
 
 //read file and build shape
 public class Builder{
     private String path;
-    private ArrayList<Point3D> vertexs;
+    private ArrayList<MyPoint> vertexs;
     private ArrayList<int[]> faces;
     private int numOfVertexs;
     private int numOfFaces;
-    private Point3D minVer, maxVer;
-    private double scale;
+    private MyPoint minVer, maxVer;
+    private double modelSize;
     
 
     public Builder(String path){
         this.path = path;
-        minVer = new Point3D( Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-        maxVer = new Point3D(-Double.MIN_VALUE,-Double.MIN_VALUE,-Double.MIN_VALUE);
-       
+        minVer = new MyPoint( Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+        maxVer = new MyPoint(-Double.MIN_VALUE,-Double.MIN_VALUE,-Double.MIN_VALUE);
+       //load();
     }
-    public ArrayList<Point3D> Vertexs(){
+    public double ModelSize(){
+        return modelSize;
+    }
+    public ArrayList<MyPoint> Vertexs(){
         return vertexs;
     }
     public ArrayList<int[]> Faces(){
         return faces;
     }
-    public Point3D MaxVer(){
+    public MyPoint MaxVer(){
         return maxVer;
     }
-    public Point3D MinVer(){
+    public MyPoint MinVer(){
         return minVer;
     }
 
@@ -46,7 +49,6 @@ public class Builder{
             numOfVertexs = Reader.nextInt();
             numOfFaces = Reader.nextInt();
             Reader.nextInt();
-           // System.out.println(numOfVertexs +", " + numOfFaces);
             
             loadVertex(Reader);
             loadFace(Reader);
@@ -58,17 +60,13 @@ public class Builder{
     }
 
     private void loadVertex(Scanner reader) {
-        vertexs = new ArrayList<Point3D>();
+        vertexs = new ArrayList<MyPoint>();
         
         for(int i=0; i< numOfVertexs; i++){
-            Point3D point = new Point3D();
+            MyPoint point = new MyPoint(0,0,0);
             point.x = reader.hasNextDouble()? reader.nextDouble(): 0;
             point.y = reader.hasNextDouble()? reader.nextDouble(): 0;
-            point.z = reader.hasNextDouble()? reader.nextDouble(): 0;
-           
-         
-            //System.out.println("Read Point: X_Y_Z: " +point.x + " " + point.y + " " +point.z);
-            
+            point.z = reader.hasNextDouble()? reader.nextDouble(): 0;       
             //Get max vertex and min vertex
             minVer.x = Math.min(minVer.x, point.x);
             minVer.y = Math.min(minVer.y, point.y);
@@ -79,32 +77,23 @@ public class Builder{
          
             vertexs.add(point);
         }
-       // reranglePoints(400);
+        reranglePoints();
     }
 
-    public void reranglePoints(int size){
-        double modelSize = Math.max(maxVer.x-minVer.x, maxVer.y-minVer.y);
+    public void reranglePoints(){
+        //the longest edge
+        modelSize = Math.max(maxVer.x-minVer.x, maxVer.y-minVer.y);
         modelSize = Math.max( modelSize, maxVer.z-minVer.z);
-        Point3D dataCenter = new Point3D(minVer.x+ modelSize/2,minVer.y+ modelSize/2, minVer.z+modelSize/2);
-        Point3D Center = new Point3D(Display.WIDTH/2, Display.WIDTH/2,Display.WIDTH/2);
-        NewVector transitionVec = new NewVector(Center,dataCenter);
-        for(Point3D point : vertexs){
+        MyPoint dataCenter = new MyPoint(minVer.x+ modelSize/2,minVer.y+ modelSize/2, minVer.z+modelSize/2);
+        for(MyPoint point : vertexs){
+            MyVector transitionVec = new MyVector(dataCenter,point);
             point.x += transitionVec.x ;
             point.y += transitionVec.y ;
             point.z += transitionVec.z ;
-          //  System.out.println("Rerangled Point: "+ point.x + " "+ point.y +" " + point.z  );
         }
     }
 
-    public void Scale(){
-        
-    //    System.out.println(maxVer.x+"  "+minVer.x);
-        double modelSize = Math.max(maxVer.x-minVer.x, maxVer.y-minVer.y);
-        modelSize = Math.max( modelSize, maxVer.z-minVer.z);
-        scale = Display.WIDTH / modelSize;
-       
-    }
-        
+ 
     private void loadFace(Scanner Reader) {
         faces = new ArrayList<int[]>();
         for(int i=0; i< numOfFaces; i++){
@@ -118,13 +107,4 @@ public class Builder{
         }
     }
 
-    public static void main(String args[]){
-        Builder builder = new Builder(System.getProperty("user.dir")+ "/Input/bunny.txt");
-        builder.load();
-    }
-
-
-   
-  
-    
 }
