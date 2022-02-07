@@ -6,12 +6,8 @@ public class MyPoint
 {
 
 	public final static MyPoint origin = new MyPoint( 0, 0, 0 );
-
 	public double x, y, z;
 	public double xOffset, yOffset, zOffset;
-
-	private Random random;
-
 	public MyPoint( double x, double y, double z )
 	{
 		this.x = x;
@@ -20,16 +16,6 @@ public class MyPoint
 		this.xOffset = 0;
 		this.yOffset = 0;
 		this.zOffset = 0;
-		this.random = new Random( );
-	}
-
-	public void shift( )
-	{
-		double shiftFactor = 0.05;
-
-		this.x += this.random.nextDouble( ) * shiftFactor * 2 - shiftFactor;
-		this.y += this.random.nextDouble( ) * shiftFactor * 2 - shiftFactor;
-		this.z += this.random.nextDouble( ) * shiftFactor * 2 - shiftFactor;
 	}
 
 	public double getAdjustedX( )

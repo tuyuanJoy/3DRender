@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import renderer.RenderType;
 import renderer.point.MyPoint;
 import renderer.point.MyVector;
 import renderer.point.PointConverter;
@@ -19,6 +20,7 @@ public class MyPolygon
 	private static final double AmbientLight = 0.05;
 
 	protected MyPoint[ ] points;
+	private MyVector faceNorm;
 
 	private Color baseColor, lightingColor;
 	private boolean visible;
@@ -37,36 +39,51 @@ public class MyPolygon
 		this.updateVisibility( );
 	}
 
-	public void render( Graphics g )
+	public void render( Graphics g , RenderType type )
 	{
-		if ( !this.visible )
-			return;
-
 		Polygon poly = new Polygon( );
 		for ( int i = 0; i < this.points.length; i++ )
 		{
 			Point p = PointConverter.convertPoint( this.points[ i ] );
 			poly.addPoint( p.x, p.y );
 		}
-
-		//Flat Shading
-		g.setColor( this.lightingColor );
-		g.fillPolygon( poly );
-
-		//Filled with Visiable edge
-		//g.setColor( Color.BLACK);
-		//g.drawPolygon(poly);
-
+		if(type == RenderType.flat || type == RenderType.lineAndFlat){
+			if ( !this.visible )
+			return;
+			//Flat Shading
+			g.setColor( this.lightingColor );
+			g.fillPolygon( poly );
+		}
+		if(type == RenderType.lineAndFlat){
+			g.setColor( Color.BLACK);
+			g.drawPolygon(poly);
+		}
+	
+		if(type == RenderType.lines){
+			//Filled with Visiable edge
+			g.setColor( Color.WHITE);
+			g.drawPolygon(poly);
+		}
+		
+	}
+	public MyVector FaceNorm(){
+		MyVector v1 = new MyVector(points[0], points[1]);
+		MyVector v2 = new MyVector(points[1], points[2]);
+		faceNorm = MyVector.cross(v1, v2);
+		return faceNorm;
 	}
 
-	public void shift( )
-	{
+	public MyPoint findSeletedp(double x, double y, MyPoint selectedPoint ){
+	
 		for ( MyPoint p : points )
 		{
-			p.shift( );
+			if(PointConverter.convertPoint(p).x == x ||PointConverter.convertPoint(p).y == y){
+				selectedPoint = selectedPoint.x < p.x? p:selectedPoint;
+			}
 		}
+		return selectedPoint;
 	}
-
+	
 	public void translate( double x, double y, double z )
 	{
 		for ( MyPoint p : points )
@@ -90,16 +107,7 @@ public class MyPolygon
 		this.setLighting( lightVector );
 	}
 
-	public double getAverageX( )
-	{
-		double sum = 0;
-		for ( MyPoint p : this.points )
-		{
-			sum += p.x + p.xOffset;
-		}
-
-		return sum / this.points.length;
-	}
+	
 
 	public void setColor( Color color )
 	{
@@ -175,12 +183,30 @@ public class MyPolygon
 			this.points[ i ] = new MyPoint( p.x, p.y, p.z );
 		}
 	}
-
+	private MyVector normVectorofFace(MyPoint[] points){
+		MyVector vec1 = new MyVector(points[0], points[1]);
+		MyVector vec2 = new MyVector(points[0], points[2]);
+		MyVector norm = MyVector.cross(vec1, vec2);
+		return norm;
+	}
 	private void updateVisibility( )
 	{
-		this.visible = this.getAverageX( ) < 0;
+		MyVector p_v = new MyVector(new MyPoint(400, 0, 0), points[0]);
+		//double dotProduct = MyVector.dot(p_v, normVectorofFace(points));
+		double dotProduct = MyVector.dot(new MyPoint(400, 0, 0), normVectorofFace(points));
+		this.visible = -dotProduct >=0;
+		//this.visible = this.getAverageX( ) < 0;
 	}
+	public double getAverageX( )
+	{
+		double sum = 0;
+		for ( MyPoint p : this.points )
+		{
+			sum += p.x + p.xOffset;
+		}
 
+		return sum / this.points.length;
+	}
 	private void updateLightingColor( double lightRatio )
 	{
 		int red = ( int ) ( this.baseColor.getRed( ) * lightRatio );

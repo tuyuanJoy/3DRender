@@ -48,8 +48,7 @@ public class Builder{
             //Store numbers data
             numOfVertexs = Reader.nextInt();
             numOfFaces = Reader.nextInt();
-            Reader.nextInt();
-            
+            Reader.nextInt();//Edge, 0 edge in these dataset
             loadVertex(Reader);
             loadFace(Reader);
             Reader.close();
@@ -67,7 +66,7 @@ public class Builder{
             point.x = reader.hasNextDouble()? reader.nextDouble(): 0;
             point.y = reader.hasNextDouble()? reader.nextDouble(): 0;
             point.z = reader.hasNextDouble()? reader.nextDouble(): 0;       
-            //Get max vertex and min vertex
+            //Get max vertex and min vertex for scaling the object in view space
             minVer.x = Math.min(minVer.x, point.x);
             minVer.y = Math.min(minVer.y, point.y);
             minVer.z = Math.min(minVer.z, point.z);
@@ -102,7 +101,6 @@ public class Builder{
             a = Reader.hasNextInt()? Reader.nextInt(): 0;
             b = Reader.hasNextInt()? Reader.nextInt(): 0;
             c = Reader.hasNextInt()? Reader.nextInt(): 0;
-           // System.out.println("1:2:3     " + a + " : "+b+" : "+c);
             faces.add(new int[]{a,b,c});
         }
     }

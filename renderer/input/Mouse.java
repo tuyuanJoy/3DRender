@@ -68,8 +68,9 @@ public class Mouse implements MouseListener, MouseMotionListener, MouseWheelList
 	}
 
 	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		// TODO Auto-generated method stub
+	public void mouseClicked(MouseEvent e) {
+		this.mouseX = e.getX();
+		this.mouseY = e.getY();
 
 	}
 

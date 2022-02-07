@@ -16,40 +16,34 @@ import renderer.input.*;
 
 public class Display extends Canvas implements Runnable
 {
-	private static final long serialVersionUID = 1L;
-
 	private Thread thread;
 	private JFrame frame;
 	private static String title = "3D Renderer";
 	public static final int WIDTH = 800;
-	public static final int HEIGHT = 600;
+	public static final int HEIGHT = 800;
 	private static boolean running = false;
 	Polyhedron tetra;
-	private int initialX, initialY = 500;
-	private double mouseSensitivity = 2.5;
-	private Builder builder;
-	double centerX = 0;
-	double centerY = 0;
-	double centerZ = 0;
-	double size = 200;
-	double moveSpeed = 20;
-	private MyVector lightVector = MyVector.normalize( new MyVector( 1, 1, 1 ) );
 
+	//mouse position, center
+	private int initialX, initialY = WIDTH/2;
+	private double mouseSensitivity = 2.5; //adjustable
+	private Builder builder;//fileloader and move data center
+	//Light
+	private MyVector lightVector = MyVector.normalize( new MyVector( 1, 1, 1 ) );
+	//user input
 	private Mouse mouse;
 
 	public Display( )
 	{
 		this.frame = new JFrame( );
-
-		Dimension size = new Dimension( WIDTH, HEIGHT );
+		Dimension size = new Dimension( WIDTH, HEIGHT ); //800 800
 		this.setPreferredSize( size );
 
+		//For user input
 		this.mouse = new Mouse();
-
 		this.addMouseListener( this.mouse );
 		this.addMouseMotionListener( this.mouse );
 		this.addMouseWheelListener( this.mouse );
-	
 	}
 
 	public static void main( String[ ] args )
@@ -68,7 +62,7 @@ public class Display extends Canvas implements Runnable
 
 	public void init(){
 
-		this.builder = new Builder(System.getProperty("user.dir")+ "\\InputData\\Doraemon.txt");
+		this.builder = new Builder(System.getProperty("user.dir")+ "\\InputData\\bunny.txt");
         this.builder.load();
 		PointConverter.setScale(0.25* WIDTH/builder.ModelSize());
 		System.out.println(0.25* WIDTH/builder.ModelSize());
@@ -81,7 +75,6 @@ public class Display extends Canvas implements Runnable
 		this.thread = new Thread( this, "Display" );
 		this.thread.start( );
 	}
-
 	public synchronized void stop( )
 	{
 		running = false;
@@ -94,18 +87,17 @@ public class Display extends Canvas implements Runnable
 			e.printStackTrace( );
 		}
 	}
-
+	
 	@Override
 	public void run( )
 	{
 		long lastTime = System.nanoTime( );
 		long timer = System.currentTimeMillis( );
-		final double ns = 1000000000.0 / 60;
+		final double ns = 1000000000.0 / 60; // limit
 		double delta = 0;
 		int frames = 0;
-
-		//this.entityManager.init( this.userInput );
-		init();
+		init(); // Initialize data info and construct
+		//Change frame in same amount of time, not depending on machine
 		while ( running )
 		{
 			long now = System.nanoTime( );
@@ -113,45 +105,42 @@ public class Display extends Canvas implements Runnable
 			lastTime = now;
 			while ( delta >= 1 )
 			{
-				update( );
+				update( ); //Receive user input
 				delta--;
-				render( );
+				render( ); //Render according to user input
 				frames++;
 			}
-
 			if ( System.currentTimeMillis( ) - timer > 1000 )
 			{
 				timer += 1000;
-				this.frame.setTitle( title + " | " + frames + " fps" );
-				frames = 0;
+				frames = 0; //reset frame
 			}
 		}
-
 		stop( );
 	}
-
 	private void render( )
 	{
+		//manage complex memory
 		BufferStrategy bs = this.getBufferStrategy( );
 		if ( bs == null )
 		{
 			this.createBufferStrategy( 3 );
 			return;
 		}
-
 		Graphics g = bs.getDrawGraphics( );
 
+		//change every frame, we need a background set it to black or white 
 		g.setColor( Color.BLACK );
 		g.fillRect( 0, 0, WIDTH * 2, HEIGHT * 2 );
 
-		tetra.render(g);
-		//this.entityManager.render( g );
+		//tetra.render(g, RenderType.lines);
+		//tetra.render(g, RenderType.flat);
+		tetra.render(g, RenderType.lineAndFlat);
 
 		g.dispose( );
 		bs.show( );
 
 	}
-
 	private void update( )
 	{
 		//tetra.rotate( true, 0,  0, 1,  lightVector);
@@ -160,10 +149,11 @@ public class Display extends Canvas implements Runnable
 		int y = this.mouse.getY( );
 		if ( this.mouse.getButton( ) == ClickType.LeftClick )
 		{
+			tetra.findSelectedPoint(x,y);
 			int xDif = x - initialX;
 			int yDif = y - initialY;
-			System.out.println(initialX + " : " +xDif + " ... " + yDif);
-			tetra.translate( 0, xDif/10,  -yDif/10 );
+			//translation
+			tetra.translate( 0, xDif/(0.25* WIDTH/builder.ModelSize()),  -yDif/(0.25* WIDTH/builder.ModelSize()) );
 			initialX = x;
 			initialY= y;
 		}
@@ -171,11 +161,15 @@ public class Display extends Canvas implements Runnable
 		{
 			int xDif = x - initialX;
 			int yDif = y - initialY;
-
-			tetra.rotate( true, -xDif / mouseSensitivity,  -yDif / mouseSensitivity, -xDif / mouseSensitivity , lightVector);
+			//Rotation
+			//tetra.rotate( true, -xDif / mouseSensitivity,  -yDif / mouseSensitivity, -xDif / mouseSensitivity , lightVector);
+			tetra.rotate( true, 0,  yDif / mouseSensitivity, xDif / mouseSensitivity , lightVector);
 			initialX = x;
 			initialY= y;
 		
+		}else if (this.mouse.getButton() == ClickType.Unknown){
+			initialX = WIDTH/2;
+			initialY = WIDTH/2;
 		}
 		//Scale with mouse wheel
 		if ( this.mouse.isScrollingUp( ) )
@@ -186,7 +180,6 @@ public class Display extends Canvas implements Runnable
 		{
 			PointConverter.zoomOut( );
 		}
-
 		this.mouse.resetScroll();
 	}
 

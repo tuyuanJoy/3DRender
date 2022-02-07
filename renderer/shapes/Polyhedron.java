@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 
+import javax.swing.event.RowSorterEvent.Type;
+
+import renderer.RenderType;
 import renderer.point.MyPoint;
 import renderer.point.MyVector;
 
@@ -11,12 +14,14 @@ public class Polyhedron
 {
 	protected MyPolygon[ ] polygons;
 	private Color color;
+	private MyPoint selectedPoint;
 
 	public Polyhedron( Color color,ArrayList<int[]>faces, ArrayList<MyPoint>vertexs )
 	{
 		this.color = color;
 		this.polygons = loadPolygons(faces, vertexs);
 		this.setPolygonColor( );
+		this.selectedPoint = new MyPoint(Double.MIN_VALUE,Double.MIN_VALUE,Double.MIN_VALUE);
 	}
 
 	private MyPolygon[] loadPolygons(ArrayList<int[]> faces, ArrayList<MyPoint> vertexs){
@@ -32,12 +37,22 @@ public class Polyhedron
         return polys;
     }
 
-	public void render( Graphics g )
+	public void render( Graphics g , RenderType type)
 	{
 		for ( MyPolygon poly : this.polygons )
 		{
-			poly.render( g );
+			poly.render( g , type );
 		}
+	}
+
+	public void findSelectedPoint(double x, double y){
+	
+		for ( MyPolygon poly : this.polygons )
+		{
+			selectedPoint = poly.findSeletedp(x, y, selectedPoint);
+		}
+		//System.out.println("Seleteced :" + selectedPoint.x +"  : "+ selectedPoint.y +" :  "+selectedPoint.z);
+		
 	}
 
 	public void translate( double x, double y, double z )

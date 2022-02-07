@@ -23,6 +23,9 @@ public class MyVector {
 	public static double dot(MyVector v1, MyVector v2) {
 		return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
 	}
+	public static double dot(MyPoint v1, MyVector v2) {
+		return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
+	}
 	
 	public static MyVector cross(MyVector v1, MyVector v2) {
 		return new MyVector(
@@ -30,6 +33,7 @@ public class MyVector {
 				v1.z*v2.x - v1.x*v2.z,
 				v1.x*v2.y - v1.y*v2.x);
 	}
+	
 	
 	public static MyVector normalize(MyVector v) {
 		double magnitude = Math.sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
