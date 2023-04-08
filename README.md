@@ -1,5 +1,5 @@
 # 3DRenderViewer.
-To build this 3D object viewer, I refered to this tutorial : https://www.youtube.com/watch?v=DQedlivHAPc&list=PLgRPwj3No0VLXFoqYnL2aYhczXB2qwKvp
+Build 3D object viewer
 
 ## What does this viewer do.
 The viewer allows the usual rendering modes:
